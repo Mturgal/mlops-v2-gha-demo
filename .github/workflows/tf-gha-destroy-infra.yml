@@ -1,0 +1,55 @@
+name: tf-gha-destroy-infra
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type YES to confirm resource destruction'
+        required: true
+
+jobs:
+  check-confirmation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check confirmation input
+        run: |
+          if [ "${{ github.event.inputs.confirm }}" != "YES" ]; then
+            echo "❌ Destruction not confirmed. Type YES to proceed."
+            exit 1
+          fi
+          echo "✅ Confirmation received. Proceeding with destroy..."
+
+  get-config:
+    needs: check-confirmation
+    uses: Azure/mlops-templates/.github/workflows/read-yaml.yml@main
+    with:
+      file_name: config-infra-prod.yml
+
+  destroy-terraform-resources:
+    needs: get-config
+    uses: Azure/mlops-templates/.github/workflows/tf-gha-install-terraform.yml@main
+    with:
+      TFAction: 'destroy'
+      dply_environment: ${{ needs.get-config.outputs.config-file }}
+      location: ${{ needs.get-config.outputs.location }}
+      namespace: ${{ needs.get-config.outputs.namespace }}
+      postfix: ${{ needs.get-config.outputs.postfix }}
+      environment: ${{ needs.get-config.outputs.environment }}
+      enable_aml_computecluster: ${{ needs.get-config.outputs.enable_aml_computecluster == true }}
+      enable_monitoring: ${{ needs.get-config.outputs.enable_monitoring == true }}
+      terraform_version: ${{ needs.get-config.outputs.terraform_version }}
+      terraform_workingdir: ${{ needs.get-config.outputs.terraform_workingdir }}
+      terraform_st_location: ${{ needs.get-config.outputs.terraform_st_location }}
+      terraform_st_storage_account: ${{ needs.get-config.outputs.terraform_st_storage_account }}
+      terraform_st_resource_group: ${{ needs.get-config.outputs.terraform_st_resource_group }}
+      terraform_st_container_name: ${{ needs.get-config.outputs.terraform_st_container_name }}
+      terraform_st_key: ${{ needs.get-config.outputs.terraform_st_key }}
+      terraform_plan_location: ${{ needs.get-config.outputs.location }}
+      terraform_plan_vnet: "TBD"
+    secrets:
+      azure_creds: ${{ secrets.AZURE_CREDENTIALS }}
+      clientId: ${{ secrets.ARM_CLIENT_ID }}
+      clientSecret: ${{ secrets.ARM_CLIENT_SECRET }}
+      subscriptionId: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      tenantId: ${{ secrets.ARM_TENANT_ID }}
+
