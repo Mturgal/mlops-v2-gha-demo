@@ -34,7 +34,7 @@ jobs:
       uses: ./.github/workflows/create-compute.yml
       with:
         cluster_name: cpu-cluster
-        size: Standard_DS1_v2
+        size: Standard_E2s_v3
         min_instances: 0
         max_instances: 4
         cluster_tier: low_priority
