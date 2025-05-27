@@ -1,6 +1,8 @@
 name: tf-gha-destroy-infra
 
 on:
+  schedule:
+    - cron: '0 22 * * *'  # 01:00 AM Istanbul time (UTC+3)
   workflow_dispatch:
     inputs:
       confirm:
