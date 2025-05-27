@@ -27,7 +27,7 @@ jobs:
 
   destroy-terraform-resources:
     needs: get-config
-    uses: Azure/mlops-templates/.github/workflows/tf-gha-install-terraform.yml@main
+    uses: ./.github/workflows/tf-gha-install-terraform.yml
     with:
       TFAction: 'destroy'
       dply_environment: ${{ needs.set-env-branch.outputs.config-file }}
